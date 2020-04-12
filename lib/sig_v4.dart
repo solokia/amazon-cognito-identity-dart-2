@@ -162,6 +162,7 @@ class SigV4 {
 
     final sortedQueryParams = [];
     queryParams.forEach((key, value) {
+      if(value!=null)
       sortedQueryParams.add(key);
     });
     sortedQueryParams.sort();
