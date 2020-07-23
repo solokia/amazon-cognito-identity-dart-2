@@ -62,6 +62,17 @@ class CognitoCredentials {
       data = await _client.request('GetCredentialsForIdentity', paramsReq,
           service: 'AWSCognitoIdentityService',
           endpoint: 'https://cognito-identity.$_region.amazonaws.com/');
+      accessKeyId = data['Credentials']['AccessKeyId'];
+      secretAccessKey = data['Credentials']['SecretKey'];
+      sessionToken = data['Credentials']['SessionToken'];
+      expireTime = (data['Credentials']['Expiration']).toInt() * 1000;
+
+      _retryCount = 0;
+      if(accessKeyId!=null){
+        return true;
+      }else {
+        return false;
+      }
     } on CognitoClientException catch (e) {
       // remove cached Identity Id and try again
       await identityId.removeIdentityId();
@@ -76,15 +87,7 @@ class CognitoCredentials {
 
     _retryCount = 0;
 
-    accessKeyId = data['Credentials']['AccessKeyId'];
-    secretAccessKey = data['Credentials']['SecretKey'];
-    sessionToken = data['Credentials']['SessionToken'];
-    expireTime = (data['Credentials']['Expiration']).toInt() * 1000;
-    if(accessKeyId!=null){
-      return true;
-    }else {
-      return false;
-    }
+    
   }
 
   /// Reset AWS Credentials; removes Identity Id from local storage
