@@ -27,15 +27,16 @@ class CognitoCredentials {
         _client = _pool.client;
 
   /// Get AWS Credentials for authenticated user
-  Future<void> getAwsCredentials(token, [String authenticator]) async {
+  Future<bool> getAwsCredentials(token, [String authenticator]) async {
     if (!(expireTime == null ||
         DateTime.now().millisecondsSinceEpoch > expireTime - 60000)) {
-      return;
+      return true;
     }
 
     final identityId = CognitoIdentityId(_identityPoolId, _pool,
         token: token, authenticator: authenticator);
-    await _getAwsCredentials(identityId);
+    return await _getAwsCredentials(identityId);
+
   }
 
   Future<void> getGuestAwsCredentialsId() async {
@@ -48,7 +49,7 @@ class CognitoCredentials {
     return _getAwsCredentials(identityId);
   }
 
-  Future<void> _getAwsCredentials(CognitoIdentityId identityId) async {
+  Future<bool> _getAwsCredentials(CognitoIdentityId identityId) async {
     userIdentityId = await identityId.getIdentityId();
 
     var paramsReq = <String, dynamic>{'IdentityId': userIdentityId};
@@ -79,6 +80,11 @@ class CognitoCredentials {
     secretAccessKey = data['Credentials']['SecretKey'];
     sessionToken = data['Credentials']['SessionToken'];
     expireTime = (data['Credentials']['Expiration']).toInt() * 1000;
+    if(accessKeyId!=null){
+      return true;
+    }else {
+      return false;
+    }
   }
 
   /// Reset AWS Credentials; removes Identity Id from local storage
